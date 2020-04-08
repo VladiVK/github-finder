@@ -16,11 +16,12 @@ export default class App extends Component {
   state = {
     users: [],
     user: {},
+    repos: [],
     loading: false,
     alert: null,
   };
-/* --------------------- For quick test -------------------------------------- */
-  // conts getMan = async (username) => {
+  /* --------------------- For quick test -------------------------------------- */
+  // const getMan = async (username) => {
   //   const res = await fetch(`https://api.github.com/users/${username}`);
   //   const result = await res.json();
   //   console.log(result);
@@ -44,17 +45,18 @@ export default class App extends Component {
 
     this.setState({ loading: true });
 
-    const res = await axios.get(`https://api.github.com/search/users?q=${text}&client_id=$
-    {process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=$
-    {process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
+    const res = await axios.get(`
+      https://api.github.com/search/users?q=${text}&client_id=$
+      {process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=$
+      {process.env.REACT_APP_GITHUB_CLIENT_SECRET}
+      `);
 
-    // items it is github api (sub object in data)
+    // items it is github api (sub_object in data)
     this.setState({ loading: false, users: res.data.items });
   };
 
   // get single user
   getUser = async (username) => {
-
     this.setState({ loading: true });
 
     const res = await axios.get(`https://api.github.com/users/${username}?client_id=$
@@ -62,8 +64,19 @@ export default class App extends Component {
     {process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
 
     this.setState({ loading: false, user: res.data });
+  };
 
-  }
+  // get User`s repos
+  getUserRepos = async (username) => {
+    this.setState({ loading: true });
+
+    const res = await axios.get(`
+    https://api.github.com/users/${username}/repos?per_page=5&sort=created:asc&client_id=$
+    {process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=$
+    {process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
+
+    this.setState({ loading: false, repos: res.data });
+  };
 
   // clear users from state
   clearUsers = () => this.setState({ users: [], loading: false });
@@ -79,7 +92,7 @@ export default class App extends Component {
     this.setState({ alert: null });
   };
   render() {
-    const {alert, loading, users, user} = this.state;
+    const { alert, loading, users, user, repos } = this.state;
     return (
       <Router>
         <div className='App'>
@@ -88,7 +101,10 @@ export default class App extends Component {
           <div className='container'>
             <Alert alert={alert} delAlert={this.delAlert} />
             <Switch>
-              <Route exact path={'/'} render={(props) => (
+              <Route
+                exact
+                path={'/'}
+                render={(props) => (
                   <Fragment>
                     <Search
                       searchUsers={this.searchUsers}
@@ -96,21 +112,26 @@ export default class App extends Component {
                       showClear={this.state.users.length > 0 ? true : false}
                       setAlert={this.setAlert}
                     />
-                    <Users
-                      loading={loading}
-                      users={users}
-                    />
+                    <Users loading={loading} users={users} />
                   </Fragment>
                 )}
               />
-              <Route exact path='/about' render={About}/>
+              <Route exact path='/about' render={About} />
 
-              <Route exact path='/user/:login' render={ props => (
-                <SingleUser {...props} user={user} getUser={this.getUser} loading={loading}/>
-              )}/>
-                
-              
-              
+              <Route
+                exact
+                path='/user/:login'
+                render={(props) => (
+                  <SingleUser
+                    {...props}
+                    user={user}
+                    getUser={this.getUser}
+                    getUserRepos={this.getUserRepos}
+                    repos={repos}
+                    loading={loading}
+                  />
+                )}
+              />
             </Switch>
           </div>
         </div>

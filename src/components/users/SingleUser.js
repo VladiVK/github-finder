@@ -1,6 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import Spinner from '../layouts/Spinner';
+import propTypes from 'prop-types'
+import Repos from '../repos/Repos';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -9,12 +11,24 @@ import {
   faSearch,
 } from '@fortawesome/free-solid-svg-icons';
 
+
 export default class SingleUser extends Component {
+
   componentDidMount() {
     this.props.getUser(this.props.match.params.login);
+    this.props.getUserRepos(this.props.match.params.login);
   }
+
+  static propTypes = {
+    getUser: propTypes.func.isRequired,
+    getUserRepos: propTypes.func.isRequired,
+    repos: propTypes.array.isRequired,
+    loading: propTypes.bool,
+    user: propTypes.object.isRequired,
+  }
+
   render() {
-    const { loading } = this.props;
+    const { loading, repos } = this.props;
 
     const {
       name,
@@ -101,7 +115,9 @@ export default class SingleUser extends Component {
             <div className="badge badge-light">Public repos: {public_repos}</div>
             <div className="badge badge-dark">Public gists: {public_gists}</div>
         </div>
-      </Fragment>
+
+        <Repos repos={repos} />
+      </Fragment >
     );
   }
 }
