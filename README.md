@@ -1,1 +1,1 @@
-# Simple React.js app (educational project with Redux & Hooks)
+# Simple React.js app (educational project)
